@@ -1,0 +1,243 @@
+openapi: 3.0.3
+info:
+  title: Account Service API
+  version: 1.0.0
+  description: >
+    Simplified REST API for managing bank accounts (savings, checking, term).
+    Optimized for exam presentation: only essential endpoints.
+servers:
+  - url: http://localhost:8081/api/v1
+    description: Local development
+
+tags:
+  - name: Accounts
+    description: Account management
+  - name: Transactions
+    description: Deposit, withdraw and balance
+
+paths:
+  /accounts:
+    post:
+      tags: [Accounts]
+      summary: Create a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AccountRequestDTO' }
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountDTO' }
+              example:
+                id: "acc-001"
+                accountType: SAVINGS
+                customerIds: ["cst-123"]
+                balance: 1000.00
+                status: ACTIVE
+        '400': { description: Invalid input }
+        '409': { description: Business rule violation }
+
+    get:
+      tags: [Accounts]
+      summary: List accounts
+      parameters:
+        - in: query
+          name: customerId
+          schema: { type: string }
+        - in: query
+          name: accountType
+          schema:
+            type: string
+            enum: [SAVINGS, CHECKING, TERM]
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AccountDTO' }
+              example:
+                - id: "acc-001"
+                  accountType: SAVINGS
+                  balance: 1000.00
+                  status: ACTIVE
+                - id: "acc-002"
+                  accountType: CHECKING
+                  balance: 2500.00
+                  status: ACTIVE
+
+  /accounts/{accountId}:
+    get:
+      tags: [Accounts]
+      summary: Get account by ID
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountDTO' }
+              example:
+                id: "acc-001"
+                accountType: SAVINGS
+                balance: 1000.00
+                status: ACTIVE
+        '404': { description: Account not found }
+
+  /accounts/{accountId}/deposit:
+    post:
+      tags: [Transactions]
+      summary: Deposit money into an account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TransactionRequestDTO' }
+      responses:
+        '201':
+          description: Deposit successful
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TransactionDTO' }
+              example:
+                id: "txn-100"
+                type: DEPOSIT
+                amount: 500.00
+                balanceAfter: 1500.00
+                timestamp: "2025-09-29T15:30:00Z"
+
+  /accounts/{accountId}/withdraw:
+    post:
+      tags: [Transactions]
+      summary: Withdraw money from an account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TransactionRequestDTO' }
+      responses:
+        '201':
+          description: Withdrawal successful
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TransactionDTO' }
+              example:
+                id: "txn-101"
+                type: WITHDRAW
+                amount: 200.00
+                balanceAfter: 800.00
+                timestamp: "2025-09-29T15:45:00Z"
+        '409': { description: Insufficient funds }
+
+  /accounts/{accountId}/balance:
+    get:
+      tags: [Transactions]
+      summary: Get account balance
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Balance information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accountId: { type: string }
+                  availableBalance: { type: number, format: double }
+              example:
+                accountId: "acc-001"
+                availableBalance: 800.00
+
+  /accounts/{accountId}/transactions:
+    get:
+      tags: [Transactions]
+      summary: List account transactions
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Transaction history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TransactionDTO' }
+              example:
+                - id: "txn-100"
+                  type: DEPOSIT
+                  amount: 500.00
+                  balanceAfter: 1500.00
+                  timestamp: "2025-09-29T15:30:00Z"
+                - id: "txn-101"
+                  type: WITHDRAW
+                  amount: 200.00
+                  balanceAfter: 1300.00
+                  timestamp: "2025-09-29T15:45:00Z"
+
+components:
+  schemas:
+    AccountRequestDTO:
+      type: object
+      properties:
+        accountType:
+          type: string
+          enum: [SAVINGS, CHECKING, TERM]
+        customerIds:
+          type: array
+          items: { type: string }
+        initialDeposit:
+          type: number
+          format: double
+      required: [accountType, customerIds]
+
+    AccountDTO:
+      type: object
+      properties:
+        id: { type: string }
+        accountType: { type: string }
+        customerIds:
+          type: array
+          items: { type: string }
+        balance: { type: number, format: double }
+        status: { type: string, enum: [ACTIVE, CLOSED, BLOCKED] }
+
+    TransactionRequestDTO:
+      type: object
+      properties:
+        amount: { type: number, format: double }
+        concept: { type: string }
+      required: [amount]
+
+    TransactionDTO:
+      type: object
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [DEPOSIT, WITHDRAW] }
+        amount: { type: number, format: double }
+        balanceAfter: { type: number, format: double }
+        timestamp: { type: string, format: date-time }
