@@ -33,4 +33,5 @@ public class Account {
     private Integer movementsThisMonth;     // contador actual
     private BigDecimal maintenanceFee;      // mantenimento
     private LocalDate operationDay;      // dia unico de operacion para TERM
+    private BigDecimal minimumAverageBalance;
 }

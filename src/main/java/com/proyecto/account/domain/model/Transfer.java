@@ -11,15 +11,18 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "transactions")
-public class Transaction {
+@Document(collection = "transfers")
+public class Transfer {
     @Id
     private String id;
-    private String operationNumber;
-    private String accountId;
-    private String type;          // "DEPOSIT", "WITHDRAW"
+
+    private String operationNumber;        // mismo número para toda la operación
+    private String fromAccountId;
+    private String toAccountId;
     private BigDecimal amount;
-    private BigDecimal balanceAfter;
     private String concept;
-    private LocalDateTime dateTransaction;
+    private LocalDateTime dateTransfer;
+
+    private String withdrawTransactionId;  // id tx retiro
+    private String depositTransactionId;   // id tx depósito
 }

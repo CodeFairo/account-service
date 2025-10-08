@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "AccountCreatedEvent",
+  "namespace": "com.proyecto.account.avro",
+  "fields": [
+    { "name": "accountId", "type": "string" },
+    { "name": "customerId", "type": "string" },
+    { "name": "walletId", "type": "string" },
+    { "name": "accountType", "type": "string" },
+    { "name": "status", "type": "string" }
+  ]
+}

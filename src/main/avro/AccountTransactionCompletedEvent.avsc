@@ -1,0 +1,14 @@
+{
+  "namespace": "com.proyecto.account.avro",
+  "type": "record",
+  "name": "AccountTransactionCompletedEvent",
+  "fields": [
+    { "name": "operationNumber", "type": "string" },
+    { "name": "accountId", "type": "string" },
+    { "name": "cardId", "type": "string" },
+    { "name": "amount", "type": "double" },
+    { "name": "concept", "type": "string" },
+    { "name": "transactionType", "type": "string" },
+    { "name": "timestamp", "type": "string" }
+  ]
+}
