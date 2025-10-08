@@ -66,8 +66,6 @@ public class TransactionsController implements TransactionsApi {
         return request
                 .flatMap(req -> withdrawUseCase.withdraw(accountId, BigDecimal.valueOf(req.getAmount()), req.getConcept()))
                 .map(transactionMapper::toDto)
-                .map(tx -> ResponseEntity.status(HttpStatus.CREATED).body(tx))
-                .onErrorResume(IllegalStateException.class,
-                        e -> Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).build()));
+                .map(tx -> ResponseEntity.status(HttpStatus.CREATED).body(tx));
     }
 }

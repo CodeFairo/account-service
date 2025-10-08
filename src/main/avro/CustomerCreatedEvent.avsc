@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "CustomerCreatedEvent",
+  "namespace": "com.proyecto.customer.avro",
+  "fields": [
+    { "name": "customerId", "type": "string" },
+    { "name": "walletId", "type": "string" },
+    { "name": "documentType", "type": "string" },
+    { "name": "documentNumber", "type": "string" },
+    { "name": "firstName", "type": "string" },
+    { "name": "lastName", "type": "string" },
+    { "name": "createdAt", "type": "string" }
+  ]
+}

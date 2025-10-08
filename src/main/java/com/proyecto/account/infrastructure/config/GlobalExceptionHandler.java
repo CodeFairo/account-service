@@ -27,6 +27,20 @@ public class GlobalExceptionHandler {
                 )));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public Mono<ResponseEntity<Map<String, Object>>> handleIllegalState(
+            IllegalStateException ex, ServerWebExchange exchange) {
+
+        return Mono.just(ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "timestamp", LocalDateTime.now(),
+                        "status", HttpStatus.CONFLICT.value(),
+                        "error", HttpStatus.CONFLICT.getReasonPhrase(),
+                        "message", ex.getMessage(),
+                        "path", exchange.getRequest().getPath().value()
+                )));
+    }
+
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<Map<String, Object>>> handleGeneric(
             Exception ex, ServerWebExchange exchange) {

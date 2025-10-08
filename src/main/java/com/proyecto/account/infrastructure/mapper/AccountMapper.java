@@ -6,6 +6,8 @@ import com.proyecto.account.model.AccountRequestDTO;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Component
 public class AccountMapper {
@@ -21,12 +23,57 @@ public class AccountMapper {
     }
 
     public AccountDTO toDto(Account account) {
+        if (account == null) {
+            return null;
+        }
+
         AccountDTO dto = new AccountDTO();
+
         dto.setId(account.getId());
         dto.setAccountType(account.getAccountType());
         dto.setCustomerIds(account.getCustomerIds());
-        dto.setBalance(account.getBalance().doubleValue());
-        dto.setStatus(AccountDTO.StatusEnum.valueOf(account.getStatus()));
+        dto.setStatus(
+                Optional.ofNullable(account.getStatus())
+                        .map(AccountDTO.StatusEnum::valueOf)
+                        .orElse(null)
+        );
+
+        dto.setBalance(
+                Optional.ofNullable(account.getBalance())
+                        .map(BigDecimal::doubleValue)
+                        .orElse(0.0)
+        );
+
+        dto.setMinimumAverageBalance(
+                Optional.ofNullable(account.getMinimumAverageBalance())
+                        .map(BigDecimal::doubleValue)
+                        .orElse(0.0)
+        );
+
+        dto.setMonthlyMovementLimit(
+                Optional.ofNullable(account.getMonthlyMovementLimit())
+                        .orElse(0)
+        );
+
+        dto.setMovementsThisMonth(
+                Optional.ofNullable(account.getMovementsThisMonth())
+                        .orElse(0)
+        );
+
+        dto.setOperationDay(
+                Optional.ofNullable(account.getOperationDay())
+                        .map(LocalDate::getDayOfMonth)
+                        .map(String::valueOf)
+                        .orElse(" ")
+        );
+
+        dto.setMaintenanceFee(
+                Optional.ofNullable(account.getMaintenanceFee())
+                        .map(BigDecimal::doubleValue)
+                        .orElse(0.0)
+        );
+
         return dto;
     }
+
 }

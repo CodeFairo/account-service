@@ -5,4 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface CreateAccountUseCase {
     Mono<Account> create(Account account);
+    Mono<Account> createFromSaga(Account account);
 }

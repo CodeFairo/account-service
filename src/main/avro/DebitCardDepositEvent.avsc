@@ -1,0 +1,13 @@
+{
+  "namespace": "com.proyecto.account.avro",
+  "type": "record",
+  "name": "DebitCardDepositEvent",
+  "fields": [
+    { "name": "cardId", "type": "string" },
+    { "name": "accountId", "type": "string" },
+    { "name": "customerId", "type": "string" },
+    { "name": "amount", "type": "double" },
+    { "name": "description", "type": ["null", "string"], "default": null },
+    { "name": "timestamp", "type": "string" }
+  ]
+}

@@ -14,6 +14,8 @@ tags:
     description: Account management
   - name: Transactions
     description: Deposit, withdraw and balance
+  - name: Transfers
+    description: Transfer money between accounts
 
 paths:
   /accounts:
@@ -60,15 +62,6 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/AccountDTO' }
-              example:
-                - id: "acc-001"
-                  accountType: SAVINGS
-                  balance: 1000.00
-                  status: ACTIVE
-                - id: "acc-002"
-                  accountType: CHECKING
-                  balance: 2500.00
-                  status: ACTIVE
 
   /accounts/{accountId}:
     get:
@@ -85,11 +78,6 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/AccountDTO' }
-              example:
-                id: "acc-001"
-                accountType: SAVINGS
-                balance: 1000.00
-                status: ACTIVE
         '404': { description: Account not found }
 
   /accounts/{accountId}/deposit:
@@ -187,17 +175,43 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/TransactionDTO' }
+
+  /accounts/transfer:
+    post:
+      tags: [Transfers]
+      summary: Transfer money between accounts
+      description: >
+        Performs a money transfer between two existing accounts.
+        Generates a shared operation number and creates corresponding
+        withdrawal and deposit transactions atomically.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TransferRequestDTO' }
+            example:
+              fromAccountId: "acc-001"
+              toAccountId: "acc-002"
+              amount: 250.00
+              concept: "Payment to vendor"
+      responses:
+        '201':
+          description: Transfer successful
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TransferDTO' }
               example:
-                - id: "txn-100"
-                  type: DEPOSIT
-                  amount: 500.00
-                  balanceAfter: 1500.00
-                  timestamp: "2025-09-29T15:30:00Z"
-                - id: "txn-101"
-                  type: WITHDRAW
-                  amount: 200.00
-                  balanceAfter: 1300.00
-                  timestamp: "2025-09-29T15:45:00Z"
+                id: "trf-100"
+                operationNumber: "2025100618453098"
+                fromAccountId: "acc-001"
+                toAccountId: "acc-002"
+                amount: 250.00
+                concept: "Payment to vendor"
+                withdrawTransactionId: "txn-500"
+                depositTransactionId: "txn-501"
+                dateTransfer: "2025-10-06T18:45:30Z"
+        '409': { description: Business rule violation (e.g. insufficient funds) }
+        '400': { description: Invalid input }
 
 components:
   schemas:
@@ -225,6 +239,11 @@ components:
           items: { type: string }
         balance: { type: number, format: double }
         status: { type: string, enum: [ACTIVE, CLOSED, BLOCKED] }
+        minimumAverageBalance: { type: number, format: double }
+        monthlyMovementLimit: { type: integer, format: int32  }
+        movementsThisMonth: { type: integer, format: int32  }
+        maintenanceFee: { type: number, format: double }
+        operationDay: { type: string }
 
     TransactionRequestDTO:
       type: object
@@ -237,7 +256,31 @@ components:
       type: object
       properties:
         id: { type: string }
+        operationNumber: { type: string }
         type: { type: string, enum: [DEPOSIT, WITHDRAW] }
         amount: { type: number, format: double }
         balanceAfter: { type: number, format: double }
+        concept: { type: string }
         timestamp: { type: string, format: date-time }
+
+    TransferRequestDTO:
+      type: object
+      properties:
+        fromAccountId: { type: string }
+        toAccountId: { type: string }
+        amount: { type: number, format: double }
+        concept: { type: string }
+      required: [fromAccountId, toAccountId, amount]
+
+    TransferDTO:
+      type: object
+      properties:
+        id: { type: string }
+        operationNumber: { type: string }
+        fromAccountId: { type: string }
+        toAccountId: { type: string }
+        amount: { type: number, format: double }
+        concept: { type: string }
+        withdrawTransactionId: { type: string }
+        depositTransactionId: { type: string }
+        dateTransfer: { type: string, format: date-time }
